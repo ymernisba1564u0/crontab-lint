@@ -1,59 +1,54 @@
-"""Orchestrates parsing, explaining, scheduling and formatting into a LintReport."""
+"""Builds a :class:`~crontab_lint.formatter.LintReport` from an expression."""
 
-from datetime import datetime
 from typing import List, Optional
 
-from crontab_lint.formatter import LintReport
-from crontab_lint.parser import parse
-from crontab_lint.explainer import explain
-from crontab_lint.scheduler import next_occurrences, SchedulerError
+from .formatter import LintReport
+from .validator import validate
+from .explainer import explain
+from .scheduler import next_occurrences, SchedulerError
 
 
 def build_report(
     expression: str,
     timezone: str = "UTC",
     count: int = 5,
-    now: Optional[datetime] = None,
 ) -> LintReport:
-    """Parse the expression and build a complete LintReport.
+    """Validate *expression*, explain it, and compute upcoming occurrences.
 
-    Args:
-        expression: A cron expression string (5 fields).
-        timezone: IANA timezone name, e.g. "America/New_York".
-        count: Number of upcoming occurrences to compute.
-        now: Reference datetime for scheduling (defaults to current time).
+    Parameters
+    ----------
+    expression:
+        A five-field cron expression string.
+    timezone:
+        IANA timezone name used for scheduling previews.
+    count:
+        Number of upcoming occurrences to include in the report.
 
-    Returns:
-        A populated LintReport instance.
+    Returns
+    -------
+    LintReport
+        Populated report ready for formatting.
     """
-    result = parse(expression)
+    validation = validate(expression)
 
-    if not result.valid:
-        return LintReport(
-            expression=expression,
-            timezone=timezone,
-            is_valid=False,
-            explanation=None,
-            errors=result.errors,
-            next_occurrences=[],
-        )
+    human_readable: Optional[str] = None
+    occurrences: List = []
+    errors: List[str] = list(validation.errors)
+    warnings: List[str] = list(validation.warnings)
 
-    explanation = explain(result)
-
-    occurrences: List[datetime] = []
-    errors = []
-    try:
-        occurrences = next_occurrences(
-            result, tz=timezone, count=count, now=now
-        )
-    except SchedulerError as exc:
-        errors.append(str(exc))
+    if validation.is_valid:
+        human_readable = explain(expression)
+        try:
+            occurrences = next_occurrences(expression, timezone=timezone, count=count)
+        except SchedulerError as exc:
+            errors.append(str(exc))
 
     return LintReport(
         expression=expression,
-        timezone=timezone,
-        is_valid=not errors,
-        explanation=explanation,
+        is_valid=validation.is_valid,
         errors=errors,
+        warnings=warnings,
+        human_readable=human_readable,
         next_occurrences=occurrences,
+        timezone=timezone,
     )
