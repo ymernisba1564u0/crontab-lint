@@ -63,3 +63,10 @@ def test_expressions_preserved_in_result():
     result = diff("0 9 * * 1", "0 10 * * 1")
     assert result.expression_a == "0 9 * * 1"
     assert result.expression_b == "0 10 * * 1"
+
+
+def test_single_field_diff_summary():
+    """A single differing field should use singular phrasing in the summary."""
+    result = diff("0 9 * * 1", "0 10 * * 1")
+    assert len(result.field_diffs) == 1
+    assert "1 field(s) differ." in result.summary
