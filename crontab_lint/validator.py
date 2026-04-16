@@ -55,3 +55,18 @@ def validate(expression: str) -> ValidationResult:
         warnings=warnings,
         parse_result=result,
     )
+
+
+def validate_many(expressions: List[str]) -> List[ValidationResult]:
+    """Validate a collection of cron expressions and return one result per entry.
+
+    Useful for bulk-checking all entries in a crontab file at once.
+
+    Args:
+        expressions: A list of cron expression strings to validate.
+
+    Returns:
+        A list of :class:`ValidationResult` objects in the same order as the
+        input list.
+    """
+    return [validate(expr) for expr in expressions]
