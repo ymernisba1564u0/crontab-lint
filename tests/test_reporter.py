@@ -43,3 +43,9 @@ def test_report_no_occurrences_on_parse_error():
 def test_report_explanation_none_on_parse_error():
     report = build_report("* * * 13 *", timezone="UTC", count=1, now=NOW)
     assert report.explanation is None
+
+
+def test_report_occurrences_are_sorted():
+    """Next occurrences should be in ascending chronological order."""
+    report = build_report("0 * * * *", timezone="UTC", count=5, now=NOW)
+    assert report.next_occurrences == sorted(report.next_occurrences)
