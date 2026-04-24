@@ -49,3 +49,10 @@ def test_report_occurrences_are_sorted():
     """Next occurrences should be in ascending chronological order."""
     report = build_report("0 * * * *", timezone="UTC", count=5, now=NOW)
     assert report.next_occurrences == sorted(report.next_occurrences)
+
+
+def test_report_occurrences_all_in_future():
+    """All next occurrences should be strictly after the reference time."""
+    report = build_report("0 * * * *", timezone="UTC", count=5, now=NOW)
+    for dt in report.next_occurrences:
+        assert dt > NOW
