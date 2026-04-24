@@ -44,6 +44,15 @@ def test_build_timeline_empty_occurrences(mock_next):
 
 
 @patch("crontab_lint.timeline.next_occurrences", return_value=FAKE_OCCURRENCES)
+def test_build_timeline_stores_expression_and_timezone(mock_next):
+    """Result should preserve the expression and timezone passed to build_timeline."""
+    result = build_timeline("0 * * * *", timezone="UTC", window_hours=24)
+    assert result.expression == "0 * * * *"
+    assert result.timezone == "UTC"
+    assert result.window_hours == 24
+
+
+@patch("crontab_lint.timeline.next_occurrences", return_value=FAKE_OCCURRENCES)
 def test_format_timeline_text_contains_header(mock_next):
     result = build_timeline("0 * * * *")
     text = format_timeline_text(result)
