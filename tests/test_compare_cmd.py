@@ -60,3 +60,17 @@ def test_json_errors_present_for_invalid(capsys):
     handle(_ns("bad", "0 9 * * *", fmt="json"))
     data = json.loads(capsys.readouterr().out)
     assert len(data["errors_a"]) > 0
+
+
+def test_json_both_invalid_returns_one():
+    """Both expressions invalid should return exit code 1."""
+    assert handle(_ns("bad", "also_bad", fmt="json")) == 1
+
+
+def test_json_both_invalid_errors_populated(capsys):
+    """Both expressions invalid should populate errors for both fields."""
+    handle(_ns("bad", "also_bad", fmt="json"))
+    data = json.loads(capsys.readouterr().out)
+    assert len(data["errors_a"]) > 0
+    assert len(data["errors_b"]) > 0
+    assert data["both_valid"] is False
