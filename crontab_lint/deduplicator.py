@@ -17,6 +17,11 @@ class DeduplicateResult:
     duplicate_count: int
     unique_count: int
 
+    @property
+    def has_duplicates(self) -> bool:
+        """Return ``True`` if any duplicate expressions were found."""
+        return self.duplicate_count > 0
+
 
 def _canonical(expression: str) -> str:
     """Return the normalised form of *expression* for identity comparison."""
