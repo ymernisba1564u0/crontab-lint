@@ -69,3 +69,13 @@ def test_empty_list_no_pairs():
     result = find_overlaps([])
     assert result.total_pairs_checked == 0
     assert result.overlaps == []
+
+
+def test_overlap_indices_reference_input_expressions():
+    """Indices stored in overlaps should correspond to the input expressions list."""
+    exprs = ["0 9 * * 1", "0 9 * * 1", "30 * * * *"]
+    result = find_overlaps(exprs)
+    for a, b, count in result.overlaps:
+        assert 0 <= a < len(exprs)
+        assert 0 <= b < len(exprs)
+        assert a < b
